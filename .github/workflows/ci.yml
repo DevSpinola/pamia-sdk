@@ -1,36 +1,89 @@
+# Nome que aparece na aba Actions do GitHub.
 name: CI
 
+# Quando o GitHub deve executar este arquivo:
 on:
+  # Ao abrir ou atualizar um pull request (pedido para juntar alterações).
   pull_request:
+    # Executa quando o destino do pedido é a main.
     branches: [main]
+  # Ao enviar alterações diretamente para uma branch, inclusive por merge.
   push:
+    # Neste gatilho, executa somente para a main.
     branches: [main]
+  # Permite iniciar manualmente pela interface do GitHub quando disponível.
   workflow_dispatch:
 
+# Permissões do acesso temporário que o GitHub fornece a esta execução.
 permissions:
+  # Pode ler o código do repositório; não precisa escrever nele.
   contents: read
 
+# Evita gastar tempo executando versões antigas do mesmo PR ou branch.
 concurrency:
+  # github.ref é preenchido pelo GitHub com a referência do PR ou branch.
   group: ci-${{ github.ref }}
+  # Se chegar outra execução do mesmo grupo, cancela a anterior em andamento.
   cancel-in-progress: true
 
+# Lista de trabalhos
 jobs:
   build:
     name: Build SDK
+    # Usa uma máquina temporária do GitHub com Linux Ubuntu 24.04.
     runs-on: ubuntu-24.04
+    # Interrompe o trabalho se ultrapassar 20 minutos.
     timeout-minutes: 20
     steps:
+      # 1. Copia os arquivos deste repositório para a máquina temporária.
       - name: Baixar codigo
+        # uses chama código pronto externo: github.com/actions/checkout.
+        # O texto após @ fixa uma revisão exata da action (versão v4.2.2).
+        # Em PRs, normalmente baixa a combinação temporária do PR com a main.
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      # 2. Prepara o Java necessário para executar as ferramentas de build.
       - name: Configurar Java 17
+        # Action externa: github.com/actions/setup-java.
+        # Seleciona um JDK disponível ou baixa um se necessário.
+        # Não compila nosso código nem chama um arquivo do projeto nesta etapa.
         uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        # Parâmetros enviados à action acima:
         with:
+          # Temurin é a distribuição do Java escolhida.
           distribution: temurin
+          # Versão principal do Java que queremos usar.
           java-version: '17'
-      # Disponibiliza sdkmanager no PATH sem depender da imagem do runner.
+
+      # 3. Prepara o programa que instala componentes Android: sdkmanager.
       - name: Configurar ferramentas Android
+        # Action externa: github.com/android-actions/setup-android.
+        # Pode baixar ferramentas do Google; aceita as licenças do Android SDK.
+        # Configura os caminhos para os próximos comandos encontrarem as ferramentas.
         uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4
+
+      # 4. Garante que os componentes Android usados pelo projeto estão instalados.
       - name: Preparar Android SDK
+        # run executa um comando no terminal da máquina temporária.
+        # sdkmanager consulta os pacotes do Google e baixa o que estiver faltando.
+        # platforms;android-36: APIs Android usadas durante a compilação.
+        # build-tools;35.0.0: ferramentas para construir pacotes Android.
+        # As versões correspondem às definidas em build.gradle.kts.
         run: sdkmanager "platforms;android-36" "build-tools;35.0.0"
+
+      # 5. Constrói o pacote da nossa biblioteca PAMIA.
       - name: Compilar biblioteca
+        # bash executa o arquivo gradlew, que pertence a este repositório.
+        # gradlew usa gradle/wrapper/gradle-wrapper.jar e
+        # gradle/wrapper/gradle-wrapper.properties para iniciar o Gradle correto.
+        # Se necessário, baixa essa versão de services.gradle.org.
+        # Gradle lê settings.gradle.kts, build.gradle.kts e gradle.properties.
+        # Pode baixar plugins e dependências dos repositórios configurados neles.
+        # assembleRelease monta o pacote .aar usando o conteúdo de src/main/.
+        # O resultado fica em build/outputs/aar/ nesta máquina temporária.
+        # --no-daemon evita deixar um processo Gradle reutilizável após o build.
+        # Esta tarefa não executa testes unitários nem publica no JitPack.
+        # jitpack.yml NÃO é chamado por este workflow: pertence ao serviço JitPack.
+        # Sem uma etapa para salvar o .aar, ele não fica disponível para download
+        # no Actions depois que a máquina temporária é descartada.
         run: bash ./gradlew assembleRelease --no-daemon
