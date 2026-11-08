@@ -59,8 +59,20 @@ Nas dependências do módulo Android consumidor:
 implementation("com.github.DevSpinola:pamia-sdk:v0.1.0")
 ```
 
-Esse exemplo depende de uma tag publicada com sucesso. Nesta versão não há API
-a chamar. O Expo precisará de uma build Android própria para incluir a biblioteca.
+Esse exemplo depende de uma tag publicada com sucesso. O Expo precisa de uma
+build Android própria para incluir a biblioteca.
+
+## Consultar a versão (código local, ainda não publicado)
+
+```java
+String versao = br.com.pamia.sdk.Pamia.obterVersao();
+```
+
+A resposta vem da versão definida pelo Gradle: `VERSION` quando fornecida na
+construção, ou `0.1.0-SNAPSHOT` localmente. A função não existe no pacote
+`0.1.0-alpha.1` já publicado; uma nova publicação será necessária para consumi-la
+pelo JitPack. O app de demonstração usa temporariamente o AAR local para testar
+a chamada real, conforme seu README. Ainda não há detecção.
 
 ## Configurar no GitHub
 

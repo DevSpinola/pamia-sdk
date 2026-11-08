@@ -12,7 +12,12 @@ android {
     namespace = "br.com.pamia.sdk"
     compileSdk = 36
     buildToolsVersion = "35.0.0"
-    defaultConfig { minSdk = 24 }
+    buildFeatures { buildConfig = true }
+    defaultConfig {
+        minSdk = 24
+        // A versão vem do mesmo valor usado na publicação, sem duplicar no Java.
+        buildConfigField("String", "SDK_VERSION", "\"${project.version}\"")
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
