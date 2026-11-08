@@ -73,15 +73,3 @@ construção, ou `0.1.0-SNAPSHOT` localmente. A função não existe no pacote
 `0.1.0-alpha.1` já publicado; uma nova publicação será necessária para consumi-la
 pelo JitPack. O app de demonstração usa temporariamente o AAR local para testar
 a chamada real, conforme seu README. Ainda não há detecção.
-
-## Configurar no GitHub
-
-Depois da primeira execução do CI, proteger a `main` exigindo PR, uma aprovação
-de outro integrante, check **Build SDK**, branch atualizada e conversas resolvidas.
-Usar squash merge e impedir push direto. Essas opções não são ativadas pelo código.
-
-## Depois
-
-Migrar funcionalidades Python e seus testes em mudanças separadas. CodeQL,
-Dependabot, lint e cobertura foram adiados. Não implementar captura, motor de
-risco ou contratos como parte deste setup.
