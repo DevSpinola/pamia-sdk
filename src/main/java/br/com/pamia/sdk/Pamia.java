@@ -7,4 +7,8 @@ public final class Pamia {
     public static String obterVersao() {
         return BuildConfig.SDK_VERSION;
     }
+
+    public static String olaMundo() {
+        return "Olá Mundo2";
+    }
 }
