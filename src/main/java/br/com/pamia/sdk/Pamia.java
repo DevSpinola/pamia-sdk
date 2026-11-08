@@ -9,6 +9,6 @@ public final class Pamia {
     }
 
     public static String olaMundo() {
-        return "Olá Mundo";
+        return "Olá Mundo2";
     }
 }
